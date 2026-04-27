@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
-import { auth } from './firebase';
+import { auth, db } from './firebase';
 import { onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "firebase/auth";
+import { ref, set, onValue } from "firebase/database";
 
 const initialData = {
   tasks: {
-    'task-1': { id: 'task-1', title: 'Hoş Geldin!', description: 'Bu senin ilk kartın. Düzenlemek için tıkla!' },
+    'task-1': { id: 'task-1', title: 'Hoş Geldin!', description: 'Bu veri artık bulutta saklanıyor.' },
   },
   columns: {
     'column-1': { id: 'column-1', title: 'Yapılacaklar', taskIds: ['task-1'] },
@@ -20,22 +21,40 @@ function App() {
   const [user, setUser] = useState(null);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [data, setData] = useState(() => {
-    const saved = localStorage.getItem('taskflow-pro');
-    return saved ? JSON.parse(saved) : initialData;
-  });
+  const [data, setData] = useState(null); // Başta null kalsın ki buluttan geleni bekleyelim
   const [editingTask, setEditingTask] = useState(null);
 
+  // 1. Kullanıcı Giriş Durumu ve Veri Çekme
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
+      if (currentUser) {
+        // Kullanıcı giriş yaptığında ona özel klasörden veriyi çek
+        const userRef = ref(db, 'users/' + currentUser.uid);
+        onValue(userRef, (snapshot) => {
+          const cloudData = snapshot.val();
+          if (cloudData) {
+            setData(cloudData);
+          } else {
+            // Eğer bulutta henüz veri yoksa başlangıç verisini yaz
+            setData(initialData);
+            set(userRef, initialData);
+          }
+        });
+      } else {
+        setData(null);
+      }
     });
     return () => unsubscribe();
   }, []);
 
+  // 2. Veri Değiştiğinde Buluta Kaydetme (Gecikmeli)
   useEffect(() => {
-    localStorage.setItem('taskflow-pro', JSON.stringify(data));
-  }, [data]);
+    if (user && data) {
+      const userRef = ref(db, 'users/' + user.uid);
+      set(userRef, data);
+    }
+  }, [data, user]);
 
   const handleAuth = async (type) => {
     try {
@@ -108,6 +127,8 @@ function App() {
     );
   }
 
+  if (!data) return <div className="loading">Yükleniyor...</div>;
+
   return (
     <div className="App">
       <header className="app-header">
@@ -121,7 +142,7 @@ function App() {
         <div className="board">
           {data.columnOrder.map(colId => {
             const column = data.columns[colId];
-            const tasks = column.taskIds.map(taskId => data.tasks[taskId]);
+            const tasks = (column.taskIds || []).map(taskId => data.tasks[taskId]);
             return (
               <div className="column" key={column.id}>
                 <div className="column-header">
@@ -132,6 +153,7 @@ function App() {
                   {(provided) => (
                     <div ref={provided.innerRef} {...provided.droppableProps} className="task-list">
                       {tasks.map((task, index) => (
+                        task && (
                         <Draggable key={task.id} draggableId={task.id} index={index}>
                           {(provided) => (
                             <div className="card" ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps} onClick={() => setEditingTask(task)}>
@@ -141,6 +163,7 @@ function App() {
                             </div>
                           )}
                         </Draggable>
+                        )
                       ))}
                       {provided.placeholder}
                     </div>
