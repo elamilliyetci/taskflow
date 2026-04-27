@@ -7,7 +7,7 @@ import { ref, set, onValue } from "firebase/database";
 
 const initialData = {
   tasks: {
-    'task-1': { id: 'task-1', title: 'Hoş Geldin!', description: 'Bu veri artık bulutta saklanıyor.' },
+    'task-1': { id: 'task-1', title: 'Hoş Geldin!', description: 'Kartlarınızı buraya ekleyebilirsiniz.' },
   },
   columns: {
     'column-1': { id: 'column-1', title: 'Yapılacaklar', taskIds: ['task-1'] },
@@ -21,22 +21,20 @@ function App() {
   const [user, setUser] = useState(null);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [data, setData] = useState(null); // Başta null kalsın ki buluttan geleni bekleyelim
+  const [data, setData] = useState(null);
   const [editingTask, setEditingTask] = useState(null);
 
-  // 1. Kullanıcı Giriş Durumu ve Veri Çekme
+  // 1. Kullanıcı oturum durumu ve Veri Çekme
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
       if (currentUser) {
-        // Kullanıcı giriş yaptığında ona özel klasörden veriyi çek
         const userRef = ref(db, 'users/' + currentUser.uid);
         onValue(userRef, (snapshot) => {
           const cloudData = snapshot.val();
           if (cloudData) {
             setData(cloudData);
           } else {
-            // Eğer bulutta henüz veri yoksa başlangıç verisini yaz
             setData(initialData);
             set(userRef, initialData);
           }
@@ -48,7 +46,7 @@ function App() {
     return () => unsubscribe();
   }, []);
 
-  // 2. Veri Değiştiğinde Buluta Kaydetme (Gecikmeli)
+  // 2. Veri Değiştiğinde Buluta Kaydetme
   useEffect(() => {
     if (user && data) {
       const userRef = ref(db, 'users/' + user.uid);
@@ -67,58 +65,79 @@ function App() {
 
   const addNewTask = (columnId) => {
     const title = prompt("Görev Başlığı:");
-    if (!title) return;
+    if (!title || !data) return;
+    
     const newTaskId = `task-${Date.now()}`;
     const newTask = { id: newTaskId, title, description: 'Detay ekleyin...' };
+    
     const currentColumn = data.columns[columnId];
-    // Eğer taskIds hiç yoksa veya bozuksa boş bir liste yarat
     const currentTaskIds = currentColumn && currentColumn.taskIds ? Array.from(currentColumn.taskIds) : [];
     
-    const updatedTaskIds = [...currentTaskIds, newTaskId];
-
     setData({
       ...data,
-      tasks: { 
-        ...data.tasks, 
-        [newTaskId]: newTask 
-      },
+      tasks: { ...data.tasks, [newTaskId]: newTask },
       columns: { 
         ...data.columns, 
-        [columnId]: { 
-          ...currentColumn, 
-          taskIds: updatedTaskIds 
-        } 
+        [columnId]: { ...currentColumn, taskIds: [...currentTaskIds, newTaskId] } 
       }
     });
+  };
+
+  const updateTask = (id, newTitle, newDesc) => {
+    setData({
+      ...data,
+      tasks: {
+        ...data.tasks,
+        [id]: { ...data.tasks[id], title: newTitle, description: newDesc }
+      }
+    });
+    setEditingTask(null);
   };
 
   const deleteTask = (taskId, columnId) => {
     const newTasks = { ...data.tasks };
     delete newTasks[taskId];
+    const currentColumn = data.columns[columnId];
+    const newTaskIds = (currentColumn.taskIds || []).filter(id => id !== taskId);
+    
     setData({
       ...data,
       tasks: newTasks,
-      columns: { ...data.columns, [columnId]: { ...data.columns[columnId], taskIds: data.columns[columnId].taskIds.filter(id => id !== taskId) } }
+      columns: { 
+        ...data.columns, 
+        [columnId]: { ...currentColumn, taskIds: newTaskIds } 
+      }
     });
   };
 
   const onDragEnd = (result) => {
     const { destination, source, draggableId } = result;
     if (!destination) return;
+    
     const start = data.columns[source.droppableId];
     const finish = data.columns[destination.droppableId];
+
     if (start === finish) {
-      const newTaskIds = Array.from(start.taskIds);
+      const newTaskIds = Array.from(start.taskIds || []);
       newTaskIds.splice(source.index, 1);
       newTaskIds.splice(destination.index, 0, draggableId);
       setData({ ...data, columns: { ...data.columns, [start.id]: { ...start, taskIds: newTaskIds } } });
       return;
     }
-    const startIds = Array.from(start.taskIds);
+
+    const startIds = Array.from(start.taskIds || []);
     startIds.splice(source.index, 1);
-    const finishIds = Array.from(finish.taskIds);
+    const finishIds = Array.from(finish.taskIds || []);
     finishIds.splice(destination.index, 0, draggableId);
-    setData({ ...data, columns: { ...data.columns, [start.id]: { ...start, taskIds: startIds }, [finish.id]: { ...finish, taskIds: finishIds } } });
+    
+    setData({
+      ...data,
+      columns: { 
+        ...data.columns, 
+        [start.id]: { ...start, taskIds: startIds }, 
+        [finish.id]: { ...finish, taskIds: finishIds } 
+      }
+    });
   };
 
   if (!user) {
@@ -164,15 +183,15 @@ function App() {
                     <div ref={provided.innerRef} {...provided.droppableProps} className="task-list">
                       {tasks.map((task, index) => (
                         task && (
-                        <Draggable key={task.id} draggableId={task.id} index={index}>
-                          {(provided) => (
-                            <div className="card" ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps} onClick={() => setEditingTask(task)}>
-                              <strong>{task.title}</strong>
-                              <p>{task.description.substring(0, 30)}...</p>
-                              <button className="del-btn" onClick={(e) => { e.stopPropagation(); deleteTask(task.id, column.id); }}>✕</button>
-                            </div>
-                          )}
-                        </Draggable>
+                          <Draggable key={task.id} draggableId={task.id} index={index}>
+                            {(provided) => (
+                              <div className="card" ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps} onClick={() => setEditingTask(task)}>
+                                <strong>{task.title}</strong>
+                                <p>{task.description ? task.description.substring(0, 30) : ''}...</p>
+                                <button className="del-btn" onClick={(e) => { e.stopPropagation(); deleteTask(task.id, column.id); }}>✕</button>
+                              </div>
+                            )}
+                          </Draggable>
                         )
                       ))}
                       {provided.placeholder}
