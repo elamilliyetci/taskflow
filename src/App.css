@@ -83,7 +83,9 @@ body {
   cursor: pointer;
 }
 
-.task-list { padding: 12px; flex-grow: 1; }
+.task-list { padding: 12px; flex-grow: 1; 
+  overflow: visible !important; 
+  min-height: 100px;}
 
 .card {
   background: rgba(255, 255, 255, 0.1);
@@ -205,4 +207,5 @@ div[data-rbd-drag-handle-context-id] {
 .column {
   position: relative;
   z-index: 1; /* Sütunlar düşük seviyede kalsın */
+  overflow: visible !important;
 }
