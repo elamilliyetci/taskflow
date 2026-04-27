@@ -182,30 +182,17 @@ button {
   background: #4f46e5;
   box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
 }
-/* Sürükleme anındaki kartı en öne çıkaran kesin çözüm */
-.task-list div[data-rbd-draggable-context-id] {
-  z-index: 9999 !important;
-  position: relative !important;
-}
-
-/* Sürükleme başladığında kartın stilini ve katmanını zorla */
-.card[data-rbd-draggable-id] {
-  transition: background-color 0.2s ease;
-}
-
-/* Sürüklenen kartın sütunların üzerinde yüzmesini sağlar */
-div[data-rbd-drag-handle-context-id] {
-  z-index: 10000 !important;
-}
-
-/* Board ve Sütunların sürüklenen kartı örtmesini engellemek için */
-.board {
-  position: relative;
-  z-index: 1;
-}
-
+/* Sürüklenen kartın sütun arkasına kaçmasını önleyen kesin ve hafif çözüm */
 .column {
-  position: relative;
-  z-index: 1; /* Sütunlar düşük seviyede kalsın */
+  overflow: visible !important; /* Kartın sütun sınırından dışarı çıkmasına izin verir */
+}
+
+.task-list {
   overflow: visible !important;
+  min-height: 100px; /* Boş sütuna kart atmayı kolaylaştırır */
+}
+
+/* Sürüklenen öğeyi en üst katmana çıkarır */
+div[data-rbd-draggable-context-id] {
+  z-index: 9999 !important;
 }
