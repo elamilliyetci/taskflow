@@ -70,9 +70,11 @@ function App() {
     if (!title) return;
     const newTaskId = `task-${Date.now()}`;
     const newTask = { id: newTaskId, title, description: 'Detay ekleyin...' };
-    const column = data.columns[columnId];
-    const newTaskIds = Array.from(column.taskIds || []); // Eğer boşsa boş bir array yarat
-    newTaskIds.push(newTaskId);
+    const currentColumn = data.columns[columnId];
+    // Eğer taskIds hiç yoksa veya bozuksa boş bir liste yarat
+    const currentTaskIds = currentColumn && currentColumn.taskIds ? Array.from(currentColumn.taskIds) : [];
+    
+    const updatedTaskIds = [...currentTaskIds, newTaskId];
 
     setData({
       ...data,
@@ -83,8 +85,8 @@ function App() {
       columns: { 
         ...data.columns, 
         [columnId]: { 
-          ...column, 
-          taskIds: newTaskIds 
+          ...currentColumn, 
+          taskIds: updatedTaskIds 
         } 
       }
     });
