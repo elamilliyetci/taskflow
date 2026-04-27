@@ -1,71 +1,135 @@
-.App {
-  text-align: center;
-  background-color: #f4f5f7;
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap');
+
+:root {
+  --primary: #6366f1;
+  --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  background: var(--bg-gradient);
   min-height: 100vh;
-  padding: 20px;
+  color: white;
+}
+
+.App { padding: 20px; }
+
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 30px;
+}
+
+.app-header h1 {
+  font-weight: 600;
+  letter-spacing: -1px;
+  background: linear-gradient(to right, #818cf8, #c084fc);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin: 0;
 }
 
 .board {
-  display: flex; /* Sütunları yan yana dizer */
-  justify-content: center;
+  display: flex;
   gap: 20px;
-  margin-top: 30px;
+  overflow-x: auto;
+  padding-bottom: 20px;
 }
 
 .column {
-  background-color: #ebecf0;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  width: 320px;
+  min-height: 500px;
+  display: flex;
+  flex-direction: column;
+}
+
+.column-header {
+  padding: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.column-header h2 { font-size: 1.1rem; margin: 0; color: #e2e8f0; }
+
+.column-header button {
+  background: rgba(99, 102, 241, 0.2);
+  border: none;
+  color: #818cf8;
   border-radius: 8px;
-  width: 250px;
-  padding: 15px;
-  min-height: 400px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-}
-
-.column h2 {
-  font-size: 1.1rem;
-  color: #172b4d;
-  margin-bottom: 15px;
-}
-
-.card {
-  background-color: white;
-  border-radius: 4px;
-  padding: 10px;
-  margin-bottom: 10px;
-  box-shadow: 0 1px 0 rgba(9,30,66,0.25);
+  width: 30px; height: 30px;
   cursor: pointer;
 }
 
-.card:hover {
-  background-color: #f4f5f7;
+.task-list { padding: 12px; flex-grow: 1; }
+
+.card {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
+  transition: all 0.3s ease;
+  position: relative;
+  cursor: grab;
 }
+
+.card:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateY(-4px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+}
+
+.card strong { display: block; font-size: 0.95rem; margin-bottom: 8px; }
+.card p { margin: 0; font-size: 0.85rem; color: #94a3b8; }
+
+.del-btn {
+  position: absolute; top: 10px; right: 10px;
+  background: none; border: none; color: #ef4444;
+  opacity: 0; cursor: pointer; transition: 0.3s;
+}
+
+.card:hover .del-btn { opacity: 1; }
+
+.login-container {
+  display: flex; justify-content: center; align-items: center; height: 100vh;
+}
+
+.login-box {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 40px; border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  width: 100%; max-width: 400px; text-align: center;
+}
+
+input {
+  width: 100%; padding: 12px; margin-bottom: 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px; color: white; box-sizing: border-box;
+}
+
+button {
+  padding: 12px 24px; border-radius: 8px; border: none;
+  font-weight: 600; cursor: pointer; transition: 0.3s;
+}
+
+.auth-buttons button:first-child { background: var(--primary); color: white; margin-right: 10px; }
+.auth-buttons button:last-child { background: transparent; color: #818cf8; border: 1px solid #818cf8; }
+
 .modal-overlay {
-  position: fixed;
-  top: 0; left: 0; width: 100%; height: 100%;
-  background: rgba(0,0,0,0.5);
-  display: flex; justify-content: center; align-items: center;
-  z-index: 1000;
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.7); backdrop-filter: blur(5px);
+  display: flex; justify-content: center; align-items: center; z-index: 1000;
 }
 
 .modal {
-  background: white; padding: 20px; border-radius: 8px;
-  width: 400px; display: flex; flex-direction: column; gap: 10px;
+  background: #1e293b; border-radius: 20px; padding: 30px;
+  width: 90%; max-width: 500px; border: 1px solid rgba(255,255,255,0.1);
 }
-
-.modal input, .modal textarea {
-  padding: 10px; border: 1px solid #ddd; border-radius: 4px;
-}
-
-.modal textarea { height: 100px; }
-
-.modal-buttons { display: flex; gap: 10px; justify-content: flex-end; }
-
-.card { cursor: pointer; position: relative; transition: background 0.2s; }
-.card:hover { background: #f4f5f7; }
-
-.login-container { height: 100vh; display: flex; justify-content: center; align-items: center; background: #f4f5f7; }
-.login-box { background: white; padding: 40px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); display: flex; flex-direction: column; gap: 15px; width: 300px; }
-.login-box input { padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
-.auth-buttons { display: flex; gap: 10px; }
-.auth-buttons button { flex: 1; padding: 10px; border: none; border-radius: 4px; cursor: pointer; background: #0052cc; color: white; }
-.app-header { display: flex; justify-content: space-between; align-items: center; padding: 0 20px; background: white; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }

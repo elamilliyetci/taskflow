@@ -24,7 +24,6 @@ function App() {
   const [data, setData] = useState(null);
   const [editingTask, setEditingTask] = useState(null);
 
-  // 1. Kullanıcı oturum durumu ve Veri Çekme
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
@@ -32,9 +31,8 @@ function App() {
         const userRef = ref(db, 'users/' + currentUser.uid);
         onValue(userRef, (snapshot) => {
           const cloudData = snapshot.val();
-          if (cloudData) {
-            setData(cloudData);
-          } else {
+          if (cloudData) setData(cloudData);
+          else {
             setData(initialData);
             set(userRef, initialData);
           }
@@ -46,7 +44,6 @@ function App() {
     return () => unsubscribe();
   }, []);
 
-  // 2. Veri Değiştiğinde Buluta Kaydetme
   useEffect(() => {
     if (user && data) {
       const userRef = ref(db, 'users/' + user.uid);
@@ -66,30 +63,21 @@ function App() {
   const addNewTask = (columnId) => {
     const title = prompt("Görev Başlığı:");
     if (!title || !data) return;
-    
     const newTaskId = `task-${Date.now()}`;
     const newTask = { id: newTaskId, title, description: 'Detay ekleyin...' };
-    
     const currentColumn = data.columns[columnId];
     const currentTaskIds = currentColumn && currentColumn.taskIds ? Array.from(currentColumn.taskIds) : [];
-    
     setData({
       ...data,
       tasks: { ...data.tasks, [newTaskId]: newTask },
-      columns: { 
-        ...data.columns, 
-        [columnId]: { ...currentColumn, taskIds: [...currentTaskIds, newTaskId] } 
-      }
+      columns: { ...data.columns, [columnId]: { ...currentColumn, taskIds: [...currentTaskIds, newTaskId] } }
     });
   };
 
   const updateTask = (id, newTitle, newDesc) => {
     setData({
       ...data,
-      tasks: {
-        ...data.tasks,
-        [id]: { ...data.tasks[id], title: newTitle, description: newDesc }
-      }
+      tasks: { ...data.tasks, [id]: { ...data.tasks[id], title: newTitle, description: newDesc } }
     });
     setEditingTask(null);
   };
@@ -99,24 +87,18 @@ function App() {
     delete newTasks[taskId];
     const currentColumn = data.columns[columnId];
     const newTaskIds = (currentColumn.taskIds || []).filter(id => id !== taskId);
-    
     setData({
       ...data,
       tasks: newTasks,
-      columns: { 
-        ...data.columns, 
-        [columnId]: { ...currentColumn, taskIds: newTaskIds } 
-      }
+      columns: { ...data.columns, [columnId]: { ...currentColumn, taskIds: newTaskIds } }
     });
   };
 
   const onDragEnd = (result) => {
     const { destination, source, draggableId } = result;
     if (!destination) return;
-    
     const start = data.columns[source.droppableId];
     const finish = data.columns[destination.droppableId];
-
     if (start === finish) {
       const newTaskIds = Array.from(start.taskIds || []);
       newTaskIds.splice(source.index, 1);
@@ -124,12 +106,10 @@ function App() {
       setData({ ...data, columns: { ...data.columns, [start.id]: { ...start, taskIds: newTaskIds } } });
       return;
     }
-
     const startIds = Array.from(start.taskIds || []);
     startIds.splice(source.index, 1);
     const finishIds = Array.from(finish.taskIds || []);
     finishIds.splice(destination.index, 0, draggableId);
-    
     setData({
       ...data,
       columns: { 
@@ -144,8 +124,9 @@ function App() {
     return (
       <div className="login-container">
         <div className="login-box">
-          <h2>TaskFlow Pro</h2>
-          <input type="email" placeholder="E-posta" onChange={(e) => setEmail(e.target.value)} />
+          <h2>TaskFlow</h2>
+          <p style={{color: '#94a3b8', fontSize: '0.9rem', marginBottom: '20px'}}>Kanban Proje Yönetim Tahtası</p>
+          <input type="email" required placeholder="E-posta" onChange={(e) => setEmail(e.target.value)} />
           <input type="password" placeholder="Şifre" onChange={(e) => setPassword(e.target.value)} />
           <div className="auth-buttons">
             <button onClick={() => handleAuth('login')}>Giriş Yap</button>
@@ -161,7 +142,7 @@ function App() {
   return (
     <div className="App">
       <header className="app-header">
-        <h1>TaskFlow Pro</h1>
+        <h1>TaskFlow</h1>
         <div className="user-info">
           <span>{user.email}</span>
           <button onClick={() => signOut(auth)}>Çıkış Yap</button>
