@@ -149,3 +149,34 @@ button {
   background: #1e293b; border-radius: 20px; padding: 30px;
   width: 90%; max-width: 500px; border: 1px solid rgba(255,255,255,0.1);
 }
+/* Modal butonları arasındaki boşluğu ve tasarımı düzenler */
+.modal-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 15px; /* Butonların arasına net bir boşluk ekler */
+  margin-top: 25px;
+}
+
+/* İptal butonunu görsel olarak daha ikincil planda tutmak için */
+.modal-buttons button:last-child {
+  background: transparent;
+  color: #94a3b8;
+  border: 1px solid #475569;
+}
+
+.modal-buttons button:last-child:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: white;
+  border-color: #94a3b8;
+}
+
+/* Kaydet butonuna tıklandığında güven vermesi için */
+.modal-buttons button:first-child {
+  background: #6366f1;
+  color: white;
+}
+
+.modal-buttons button:first-child:hover {
+  background: #4f46e5;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
