@@ -19,16 +19,32 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-bottom: 30px;
+  padding: 20px 0 40px 0; /* Üstten ve alttan biraz boşluk */
+  max-width: 1000px;      /* Sütunlarla aynı hizada olması için */
+  margin: 0 auto;         /* Header'ı sayfada ortalar */
 }
 
-.app-header h1 {
-  font-weight: 600;
-  letter-spacing: -1px;
-  background: linear-gradient(to right, #818cf8, #c084fc);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  margin: 0;
+.board {
+  display: flex;
+  gap: 20px;
+  justify-content: center; /* Sütunları sayfanın ortasına toplar */
+  padding-bottom: 20px;
+}
+
+.logout-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.logout-btn:hover {
+  background: #ef4444; /* Çıkış yaparken kırmızıya dönmesi şık bir detay olur */
+  border-color: #ef4444;
 }
 
 .board {

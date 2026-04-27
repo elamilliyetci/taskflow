@@ -142,12 +142,9 @@ function App() {
   return (
     <div className="App">
       <header className="app-header">
-        <h1>TaskFlow</h1>
-        <div className="user-info">
-          <span>{user.email}</span>
-          <button onClick={() => signOut(auth)}>Çıkış Yap</button>
-        </div>
-      </header>
+  <h1>TaskFlow</h1>
+  <button className="logout-btn" onClick={() => signOut(auth)}>Çıkış Yap</button>
+</header>
       <DragDropContext onDragEnd={onDragEnd}>
         <div className="board">
           {data.columnOrder.map(colId => {
