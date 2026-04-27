@@ -55,14 +55,14 @@ body {
 }
 
 .column {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(10px);
+  background: rgba(30, 41, 59, 0.7); /* Bulanıklık yerine biraz daha koyu/net bir renk */
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 16px;
   width: 320px;
   min-height: 500px;
   display: flex;
   flex-direction: column;
+  overflow: visible !important;
 }
 
 .column-header {
@@ -182,28 +182,19 @@ button {
   background: #4f46e5;
   box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
 }
-/* 1. Sürükleme başladığında tüm sütunların cam etkisini geçici olarak kapatır */
-/* Bu sayede kart hiçbir şeyin arkasında kalamaz */
-.board:has(div[data-rbd-draggable-context-id]) .column {
-  backdrop-filter: none !important;
-  z-index: 1 !important;
+/* Sürüklenen kartın sütun sınırlarını aşmasını sağlar */
+.task-list {
+  overflow: visible !important;
+  min-height: 100px;
 }
 
-/* 2. Sürüklenen kartı en üst katmana zorla ve görünür yap */
+/* Sürükleme anında kartı en öne fırlatır */
 div[data-rbd-draggable-context-id] {
   z-index: 99999 !important;
-  position: fixed !important; /* Tarayıcı ekranına göre konumlandırır */
 }
 
-/* 3. Sütunların ve listenin dışarı taşmaya izin verdiğinden emin ol */
-.column, .task-list {
-  overflow: visible !important;
-}
-
-/* 4. Sürükleme anındaki kartın kendisine ekstra belirginlik kat */
 .card[style*="translate"] {
-  background: rgba(255, 255, 255, 0.25) !important;
-  box-shadow: 0 20px 50px rgba(0,0,0,0.5) !important;
-  border: 1px solid rgba(255, 255, 255, 0.4) !important;
   z-index: 99999 !important;
+  background: #334155 !important; /* Sürüklenirken daha opak (net) bir renk */
+  box-shadow: 0 20px 50px rgba(0,0,0,0.6) !important;
 }
