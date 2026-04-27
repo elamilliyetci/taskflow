@@ -70,16 +70,24 @@ function App() {
     if (!title) return;
     const newTaskId = `task-${Date.now()}`;
     const newTask = { id: newTaskId, title, description: 'Detay ekleyin...' };
+    const column = data.columns[columnId];
+    const newTaskIds = Array.from(column.taskIds || []); // Eğer boşsa boş bir array yarat
+    newTaskIds.push(newTaskId);
+
     setData({
       ...data,
-      tasks: { ...data.tasks, [newTaskId]: newTask },
-      columns: { ...data.columns, [columnId]: { ...data.columns[columnId], taskIds: [...data.columns[columnId].taskIds, newTaskId] } }
+      tasks: { 
+        ...data.tasks, 
+        [newTaskId]: newTask 
+      },
+      columns: { 
+        ...data.columns, 
+        [columnId]: { 
+          ...column, 
+          taskIds: newTaskIds 
+        } 
+      }
     });
-  };
-
-  const updateTask = (id, newTitle, newDesc) => {
-    setData({ ...data, tasks: { ...data.tasks, [id]: { ...data.tasks[id], title: newTitle, description: newDesc } } });
-    setEditingTask(null);
   };
 
   const deleteTask = (taskId, columnId) => {
