@@ -55,8 +55,21 @@ function App() {
 
   const handleAuth = async (type) => {
     try {
-      if (type === 'login') await signInWithEmailAndPassword(auth, email, password);
-      else await createUserWithEmailAndPassword(auth, email, password);
+      if (type === 'login') {
+        await signInWithEmailAndPassword(auth, email, password);
+      } else {
+        // Kayıt Ol işlemi
+        await createUserWithEmailAndPassword(auth, email, password);
+        
+        // Kayıt başarılı olduktan sonra otomatik girişi engellemek için:
+        await signOut(auth); 
+        
+        // Kullanıcıya bilgi ver ve giriş ekranına yönlendir
+        alert("Hesabınız başarıyla oluşturuldu! Lütfen şimdi giriş yapın.");
+        setIsSignUp(false);
+        setEmail('');    // Alanları temizle
+        setPassword('');
+      }
     } catch (error) {
       alert("Hata: " + error.message);
     }
