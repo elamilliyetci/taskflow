@@ -29,26 +29,34 @@ function App() {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
-      setAuthLoading(false); // Kullanıcı durumu belirlendiğinde yüklemeyi bitir
-      
+      setAuthLoading(false);
+  
       if (currentUser) {
-        const userRef = ref(db, 'users/' + currentUser.uid);
+        // Her kullanıcının verisi kendi UID'si altında tutulur
+        const userRef = ref(db, `users/${currentUser.uid}/boardData`); 
+        
         onValue(userRef, (snapshot) => {
           const cloudData = snapshot.val();
-          if (cloudData) setData(cloudData);
-          else {
+          if (cloudData) {
+            setData(cloudData);
+          } else {
+            // Eğer yeni kullanıcıysa ona boş bir başlangıç verisi oluştur
             setData(initialData);
             set(userRef, initialData);
           }
         });
+      } else {
+        setData(null);
       }
     });
     return () => unsubscribe();
   }, []);
+ 
 
   useEffect(() => {
     if (user && data) {
-      const userRef = ref(db, 'users/' + user.uid);
+      // Veriyi genel users içine değil, o anki kullanıcının klasörüne yazıyoruz
+      const userRef = ref(db, `users/${user.uid}/boardData`);
       set(userRef, data);
     }
   }, [data, user]);
