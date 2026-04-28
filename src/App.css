@@ -224,3 +224,13 @@ div[data-rbd-draggable-context-id] {
   padding: 20px;
   overflow-x: hidden; /* Sayfanın tamamının sağa sola sallanmasını engeller */
 }
+
+.loading-screen {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  font-size: 1.5rem;
+  color: #818cf8;
+  background: var(--bg-gradient);
+}

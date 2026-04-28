@@ -23,10 +23,13 @@ function App() {
   const [password, setPassword] = useState('');
   const [data, setData] = useState(null);
   const [editingTask, setEditingTask] = useState(null);
-
+  const [authLoading, setAuthLoading] = useState(true); // Yeni eklendi
+  
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
+      setAuthLoading(false); // Kullanıcı durumu belirlendiğinde yüklemeyi bitir
+      
       if (currentUser) {
         const userRef = ref(db, 'users/' + currentUser.uid);
         onValue(userRef, (snapshot) => {
@@ -37,8 +40,6 @@ function App() {
             set(userRef, initialData);
           }
         });
-      } else {
-        setData(null);
       }
     });
     return () => unsubscribe();
@@ -121,6 +122,16 @@ function App() {
   };
 
   if (!user) {
+    // Eğer Firebase hala kullanıcının kim olduğunu kontrol ediyorsa hiçbir şey gösterme (veya yükleniyor yazısı göster)
+if (authLoading) return <div className="loading-screen">Yükleniyor...</div>;
+
+if (!user) {
+  return (
+    <div className="login-container">
+      {/* ... login kodların ... */}
+    </div>
+  );
+}
     return (
       <div className="login-container">
         <div className="login-box">
