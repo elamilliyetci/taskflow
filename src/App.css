@@ -302,3 +302,30 @@ div[data-rbd-draggable-context-id] {
   /* Sürükleme anında alt elemanların kaymasını önleyen hizalama */
   justify-content: flex-start; 
 }
+
+/* Kartların temel stili ve yumuşak geçişi */
+.card {
+  /* Diğer renk/padding stillerin kalsın */
+  transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.2s ease !important;
+  position: relative;
+  user-select: none; /* Sürüklerken metnin seçilmesini engeller, daha stabil hissettirir */
+}
+
+/* Sürükleme sırasında listedeki diğer kartların (örneğin 'cnm' kartı) 
+   aşağı kayma hızını kontrol eder */
+.task-list > div {
+  transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1) !important;
+}
+
+/* Sürüklenen kartın orijinal yerinde bıraktığı o "hayalet" boşluğun 
+   aniden zıplamasını engellemek için */
+[data-rbd-placeholder-context-id] {
+  transition: none !important;
+}
+
+.task-list {
+  min-height: 150px; /* Biraz daha geniş bir alan zıplamayı azaltır */
+  display: flex;
+  flex-direction: column;
+  gap: 12px; /* Kartlar arasındaki boşluğu CSS ile vermek zıplamayı yumuşatır */
+}
