@@ -248,10 +248,11 @@ return (
           <h3>Düzenle</h3>
           <input id="edit-title" defaultValue={editingTask.title} style={{width: '100%', marginBottom: '10px'}} />
           <textarea 
-  id="edit-desc" 
-  defaultValue={editingTask.description} 
-  placeholder="Detay ekleyin..." 
-/>          <div className="modal-buttons">
+            id="edit-desc" 
+            defaultValue={editingTask.description} 
+            placeholder="Detay ekleyin..." 
+          />          
+            <div className="modal-buttons">
             <button onClick={() => updateTask(editingTask.id, document.getElementById('edit-title').value, document.getElementById('edit-desc').value)}>Kaydet</button>
             <button onClick={() => setEditingTask(null)}>İptal</button>
           </div>
