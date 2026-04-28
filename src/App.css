@@ -22,9 +22,9 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px 0 40px 0; /* Üstten ve alttan biraz boşluk */
-  max-width: 1000px;      /* Sütunlarla aynı hizada olması için */
-  margin: 0 auto;         /* Header'ı sayfada ortalar */
+  padding: 20px;
+  max-width: 1000px; /* Sütunların toplam genişliğine yakın bir değer */
+  margin: 0 auto;    /* Header'ı bilgisayarda ortalar */
 }
 
 .board {
@@ -32,8 +32,21 @@ body {
   gap: 20px;
   overflow-x: auto;
   padding: 20px;
-  justify-content: flex-start; /* Sütunları en soldan başlatır, dışarıda bırakmaz */
+  /* Bilgisayarda ortalar, mobilde otomatik olarak sola yaslanır */
+  justify-content: center; 
   -webkit-overflow-scrolling: touch;
+}
+
+/* MOBİL İÇİN ÖZEL AYAR (Ekran 768px'den küçükse) */
+@media (max-width: 768px) {
+  .board {
+    justify-content: flex-start; /* Mobilde en soldan başlatır */
+    padding-left: 20px;
+  }
+  
+  .column {
+    flex: 0 0 280px; /* Mobilde sütunlar daha dar olsun */
+  }
 }
 
 .logout-btn {
