@@ -13,7 +13,10 @@ body {
   color: white;
 }
 
-.App { padding: 20px; }
+.App {
+  padding: 10px; /* 20px'den 10px'e düşürdük, yer kazandık */
+  overflow-x: hidden; /* Sayfanın sağa sola titremesini engeller */
+}
 
 .app-header {
   display: flex;
@@ -27,8 +30,10 @@ body {
 .board {
   display: flex;
   gap: 20px;
-  justify-content: center; /* Sütunları sayfanın ortasına toplar */
-  padding-bottom: 20px;
+  overflow-x: auto;
+  padding: 20px;
+  justify-content: flex-start; /* Sütunları en soldan başlatır, dışarıda bırakmaz */
+  -webkit-overflow-scrolling: touch;
 }
 
 .logout-btn {
