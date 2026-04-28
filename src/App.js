@@ -121,93 +121,106 @@ function App() {
     });
   };
 
-  if (!user) {
-    // Eğer Firebase hala kullanıcının kim olduğunu kontrol ediyorsa hiçbir şey gösterme (veya yükleniyor yazısı göster)
-if (authLoading) return <div className="loading-screen">Yükleniyor...</div>;
+// 1. Durum: Firebase kimlik kontrolü yaparken veya veriler buluttan inerken gösterilecek ekran
+if (authLoading || (user && !data)) {
+  return <div className="loading-screen">Yükleniyor...</div>;
+}
 
+// 2. Durum: Kontrol bitti ve kullanıcı giriş yapmamışsa gösterilecek giriş ekranı
 if (!user) {
   return (
     <div className="login-container">
-      {/* ... login kodların ... */}
+      <div className="login-box">
+        <h2>TaskFlow</h2>
+        <p style={{ color: '#94a3b8', fontSize: '0.9rem', marginBottom: '20px' }}>
+          Kanban Proje Yönetim Tahtası
+        </p>
+        <input 
+          type="email" 
+          required 
+          placeholder="E-posta" 
+          onChange={(e) => setEmail(e.target.value)} 
+        />
+        <input 
+          type="password" 
+          placeholder="Şifre" 
+          onChange={(e) => setPassword(e.target.value)} 
+        />
+        <div className="auth-buttons">
+          <button onClick={() => handleAuth('login')}>Giriş Yap</button>
+          <button onClick={() => handleAuth('signup')}>Kayıt Ol</button>
+        </div>
+      </div>
     </div>
   );
 }
-    return (
-      <div className="login-container">
-        <div className="login-box">
-          <h2>TaskFlow</h2>
-          <p style={{color: '#94a3b8', fontSize: '0.9rem', marginBottom: '20px'}}>Kanban Proje Yönetim Tahtası</p>
-          <input type="email" required placeholder="E-posta" onChange={(e) => setEmail(e.target.value)} />
-          <input type="password" placeholder="Şifre" onChange={(e) => setPassword(e.target.value)} />
-          <div className="auth-buttons">
-            <button onClick={() => handleAuth('login')}>Giriş Yap</button>
-            <button onClick={() => handleAuth('signup')}>Kayıt Ol</button>
+
+// 3. Durum: Her şey hazırsa ana uygulama ekranı
+return (
+  <div className="App">
+    <header className="app-header">
+      <h1>TaskFlow</h1>
+      <button className="logout-btn" onClick={() => signOut(auth)}>Çıkış Yap</button>
+    </header>
+    
+    <DragDropContext onDragEnd={onDragEnd}>
+      <div className="board">
+        {data.columnOrder.map(colId => {
+          const column = data.columns[colId];
+          const tasks = (column.taskIds || []).map(taskId => data.tasks[taskId]);
+          return (
+            <div className="column" key={column.id}>
+              <div className="column-header">
+                <h2>{column.title}</h2>
+                <button onClick={() => addNewTask(column.id)}>+</button>
+              </div>
+              <Droppable droppableId={column.id}>
+                {(provided) => (
+                  <div ref={provided.innerRef} {...provided.droppableProps} className="task-list">
+                    {tasks.map((task, index) => (
+                      task && (
+                        <Draggable key={task.id} draggableId={task.id} index={index}>
+                          {(provided) => (
+                            <div 
+                              className="card" 
+                              ref={provided.innerRef} 
+                              {...provided.draggableProps} 
+                              {...provided.dragHandleProps} 
+                              onClick={() => setEditingTask(task)}
+                            >
+                              <strong>{task.title}</strong>
+                              <p>{task.description ? task.description.substring(0, 30) : ''}...</p>
+                              <button className="del-btn" onClick={(e) => { e.stopPropagation(); deleteTask(task.id, column.id); }}>✕</button>
+                            </div>
+                          )}
+                        </Draggable>
+                      )
+                    ))}
+                    {provided.placeholder}
+                  </div>
+                )}
+              </Droppable>
+            </div>
+          );
+        })}
+      </div>
+    </DragDropContext>
+
+    {editingTask && (
+      <div className="modal-overlay">
+        <div className="modal">
+          <h3>Düzenle</h3>
+          <input id="edit-title" defaultValue={editingTask.title} style={{width: '100%', marginBottom: '10px'}} />
+          <textarea id="edit-desc" defaultValue={editingTask.description} style={{width: '100%', minHeight: '100px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'white', borderRadius: '8px', padding: '10px'}} />
+          <div className="modal-buttons">
+            <button onClick={() => updateTask(editingTask.id, document.getElementById('edit-title').value, document.getElementById('edit-desc').value)}>Kaydet</button>
+            <button onClick={() => setEditingTask(null)}>İptal</button>
           </div>
         </div>
       </div>
-    );
-  }
-
-  if (!data) return <div className="loading">Yükleniyor...</div>;
-
-  return (
-    <div className="App">
-      <header className="app-header">
-  <h1>TaskFlow</h1>
-  <button className="logout-btn" onClick={() => signOut(auth)}>Çıkış Yap</button>
-</header>
-      <DragDropContext onDragEnd={onDragEnd}>
-        <div className="board">
-          {data.columnOrder.map(colId => {
-            const column = data.columns[colId];
-            const tasks = (column.taskIds || []).map(taskId => data.tasks[taskId]);
-            return (
-              <div className="column" key={column.id}>
-                <div className="column-header">
-                  <h2>{column.title}</h2>
-                  <button onClick={() => addNewTask(column.id)}>+</button>
-                </div>
-                <Droppable droppableId={column.id}>
-                  {(provided) => (
-                    <div ref={provided.innerRef} {...provided.droppableProps} className="task-list">
-                      {tasks.map((task, index) => (
-                        task && (
-                          <Draggable key={task.id} draggableId={task.id} index={index}>
-                            {(provided) => (
-                              <div className="card" ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps} onClick={() => setEditingTask(task)}>
-                                <strong>{task.title}</strong>
-                                <p>{task.description ? task.description.substring(0, 30) : ''}...</p>
-                                <button className="del-btn" onClick={(e) => { e.stopPropagation(); deleteTask(task.id, column.id); }}>✕</button>
-                              </div>
-                            )}
-                          </Draggable>
-                        )
-                      ))}
-                      {provided.placeholder}
-                    </div>
-                  )}
-                </Droppable>
-              </div>
-            );
-          })}
-        </div>
-      </DragDropContext>
-
-      {editingTask && (
-        <div className="modal-overlay">
-          <div className="modal">
-            <h3>Düzenle</h3>
-            <input id="edit-title" defaultValue={editingTask.title} />
-            <textarea id="edit-desc" defaultValue={editingTask.description} />
-            <div className="modal-buttons">
-              <button onClick={() => updateTask(editingTask.id, document.getElementById('edit-title').value, document.getElementById('edit-desc').value)}>Kaydet</button>
-              <button onClick={() => setEditingTask(null)}>İptal</button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
+    )}
+  </div>
+);
 }
 
 export default App;
