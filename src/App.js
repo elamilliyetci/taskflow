@@ -220,7 +220,9 @@ return (
                               onClick={() => setEditingTask(task)}
                             >
                               <strong>{task.title}</strong>
-                              <p>{task.description ? task.description.substring(0, 30) : ''}...</p>
+                              <p style={{ color: task.description ? '#94a3b8' : 'rgba(148, 163, 184, 0.5)', fontStyle: task.description ? 'normal' : 'italic' }}>
+                                 {task.description || 'Detay ekleyin...'}
+                              </p>
                               <button className="del-btn" onClick={(e) => { e.stopPropagation(); deleteTask(task.id, column.id); }}>✕</button>
                             </div>
                           )}
