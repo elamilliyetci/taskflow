@@ -277,3 +277,14 @@ div[data-rbd-draggable-context-id] {
   margin-bottom: 15px; /* Aralarında eşit boşluk bırakır */
   font-family: inherit;
 }
+
+/* Sürükleme sırasında diğer kartların garip titremelerini engeller */
+.card {
+  /* ... mevcut stillerin ... */
+  transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1), background-color 0.2s ease !important;
+}
+
+/* Sürüklenen kartın yerini alan boşluğun (placeholder) yüksekliğini kartla aynı yapar */
+.task-list > div:not(.card) {
+  transition: none !important;
+}
