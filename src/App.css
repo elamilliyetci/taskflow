@@ -234,3 +234,28 @@ div[data-rbd-draggable-context-id] {
   color: #818cf8;
   background: var(--bg-gradient);
 }
+
+.secondary-btn {
+  background: transparent !important;
+  border: 1px solid #818cf8 !important;
+  color: #818cf8 !important;
+  margin-top: 10px;
+}
+
+.secondary-btn:hover {
+  background: rgba(129, 140, 248, 0.1) !important;
+}
+
+.text-btn {
+  background: transparent !important;
+  border: none !important;
+  color: #94a3b8 !important;
+  text-decoration: underline;
+  font-size: 0.8rem;
+  margin-top: 15px;
+  cursor: pointer;
+}
+
+.text-btn:hover {
+  color: white !important;
+}

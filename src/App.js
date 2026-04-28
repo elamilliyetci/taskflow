@@ -24,6 +24,7 @@ function App() {
   const [data, setData] = useState(null);
   const [editingTask, setEditingTask] = useState(null);
   const [authLoading, setAuthLoading] = useState(true); // Yeni eklendi
+  const [isSignUp, setIsSignUp] = useState(false); // Kayıt ekranında olup olmadığını kontrol eder
   
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -133,22 +134,35 @@ if (!user) {
       <div className="login-box">
         <h2>TaskFlow</h2>
         <p style={{ color: '#94a3b8', fontSize: '0.9rem', marginBottom: '20px' }}>
-          Kanban Proje Yönetim Tahtası
+          {isSignUp ? "Yeni Hesap Oluşturun" : "Kanban Proje Yönetim Tahtası"}
         </p>
+        
         <input 
           type="email" 
           required 
           placeholder="E-posta" 
+          value={email}
           onChange={(e) => setEmail(e.target.value)} 
         />
         <input 
           type="password" 
           placeholder="Şifre" 
+          value={password}
           onChange={(e) => setPassword(e.target.value)} 
         />
+
         <div className="auth-buttons">
-          <button onClick={() => handleAuth('login')}>Giriş Yap</button>
-          <button onClick={() => handleAuth('signup')}>Kayıt Ol</button>
+          {isSignUp ? (
+            <>
+              <button onClick={() => handleAuth('signup')}>Hesabı Oluştur</button>
+              <button className="text-btn" onClick={() => setIsSignUp(false)}>Giriş Ekranına Dön</button>
+            </>
+          ) : (
+            <>
+              <button onClick={() => handleAuth('login')}>Giriş Yap</button>
+              <button className="secondary-btn" onClick={() => setIsSignUp(true)}>Kayıt Ol</button>
+            </>
+          )}
         </div>
       </div>
     </div>
