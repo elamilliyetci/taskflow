@@ -288,3 +288,17 @@ div[data-rbd-draggable-context-id] {
 .task-list > div:not(.card) {
   transition: none !important;
 }
+
+/* Kartların sürükleme anında birbirini "itme" animasyonunu yumuşatır */
+[data-rbd-draggable-context-id] {
+  transition-duration: 0.001s !important;
+}
+
+/* Sürükleme sırasında listenin genişlemesini veya daralmasını engellemek için */
+.task-list {
+  display: flex;
+  flex-direction: column;
+  min-height: 150px;
+  /* Sürükleme anında alt elemanların kaymasını önleyen hizalama */
+  justify-content: flex-start; 
+}
