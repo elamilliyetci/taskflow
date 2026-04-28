@@ -85,15 +85,23 @@ function App() {
   };
 
   const addNewTask = (columnId) => {
-    const title = prompt("Görev Başlığı:"); // 'title' burada tanımlanıyor
+    // 1. Önce kullanıcıdan başlık alıyoruz (title burada tanımlanıyor)
+    const title = prompt("Görev Başlığı:"); 
+    
+    // 2. Eğer başlık boşsa fonksiyonu bitiriyoruz
     if (!title || !data) return;
     
-    const newTaskId = `task-${Date.now()}`; // 'newTaskId' burada tanımlanıyor
-    const newTask = { id: newTaskId, title, description: '' }; // description artık boş
+    // 3. Benzersiz bir ID oluşturuyoruz (newTaskId burada tanımlanıyor)
+    const newTaskId = `task-${Date.now()}`; 
     
+    // 4. Yeni görev objesini oluşturuyoruz (açıklama artık boş)
+    const newTask = { id: newTaskId, title, description: '' };
+    
+    // 5. Mevcut sütunu ve içindeki ID listesini alıyoruz
     const currentColumn = data.columns[columnId];
     const currentTaskIds = currentColumn && currentColumn.taskIds ? Array.from(currentColumn.taskIds) : [];
     
+    // 6. State'i güncelliyoruz
     setData({
       ...data,
       tasks: { ...data.tasks, [newTaskId]: newTask },
