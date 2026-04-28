@@ -50,19 +50,22 @@ body {
 .board {
   display: flex;
   gap: 20px;
-  overflow-x: auto;
-  padding-bottom: 20px;
+  overflow-x: auto; /* Yanlamasına kaydırmaya izin verir */
+  padding: 10px;
+  scroll-snap-type: x mandatory; /* Mobilde sütunların "tak" diye oturmasını sağlar */
+  -webkit-overflow-scrolling: touch; /* Mobilde kaydırmayı akıcı yapar */
 }
 
 .column {
-  background: rgba(30, 41, 59, 0.7); /* Bulanıklık yerine biraz daha koyu/net bir renk */
+  background: rgba(30, 41, 59, 0.7); 
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 16px;
-  width: 320px;
+  flex: 0 0 280px;      /* 320px yerine bunu yazdık */
   min-height: 500px;
   display: flex;
   flex-direction: column;
   overflow: visible !important;
+  scroll-snap-align: start; /* Mobilde kaydırınca sütunu tam hizalar */
 }
 
 .column-header {
@@ -197,4 +200,9 @@ div[data-rbd-draggable-context-id] {
   z-index: 99999 !important;
   background: #334155 !important; /* Sürüklenirken daha opak (net) bir renk */
   box-shadow: 0 20px 50px rgba(0,0,0,0.6) !important;
+}
+
+.App {
+  padding: 20px;
+  overflow-x: hidden; /* Sayfanın tamamının sağa sola sallanmasını engeller */
 }
