@@ -23,25 +23,19 @@ function App() {
   const [password, setPassword] = useState('');
   const [data, setData] = useState(null);
   const [editingTask, setEditingTask] = useState(null);
-  const [authLoading, setAuthLoading] = useState(true); // Yeni eklendi
-  const [isSignUp, setIsSignUp] = useState(false); // Kayıt ekranında olup olmadığını kontrol eder
-  const newTask = { id: newTaskId, title, description: '' }; // İçini boş bırakıyoruz
-  
+  const [authLoading, setAuthLoading] = useState(true);
+  const [isSignUp, setIsSignUp] = useState(false);
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
       setAuthLoading(false);
-  
       if (currentUser) {
-        // Her kullanıcının verisi kendi UID'si altında tutulur
-        const userRef = ref(db, `users/${currentUser.uid}/boardData`); 
-        
+        const userRef = ref(db, `users/${currentUser.uid}/boardData`);
         onValue(userRef, (snapshot) => {
           const cloudData = snapshot.val();
-          if (cloudData) {
-            setData(cloudData);
-          } else {
-            // Eğer yeni kullanıcıysa ona boş bir başlangıç verisi oluştur
+          if (cloudData) setData(cloudData);
+          else {
             setData(initialData);
             set(userRef, initialData);
           }
@@ -52,11 +46,9 @@ function App() {
     });
     return () => unsubscribe();
   }, []);
- 
 
   useEffect(() => {
     if (user && data) {
-      // Veriyi genel users içine değil, o anki kullanıcının klasörüne yazıyoruz
       const userRef = ref(db, `users/${user.uid}/boardData`);
       set(userRef, data);
     }
@@ -67,16 +59,11 @@ function App() {
       if (type === 'login') {
         await signInWithEmailAndPassword(auth, email, password);
       } else {
-        // Kayıt Ol işlemi
         await createUserWithEmailAndPassword(auth, email, password);
-        
-        // Kayıt başarılı olduktan sonra otomatik girişi engellemek için:
-        await signOut(auth); 
-        
-        // Kullanıcıya bilgi ver ve giriş ekranına yönlendir
+        await signOut(auth);
         alert("Hesabınız başarıyla oluşturuldu! Lütfen şimdi giriş yapın.");
         setIsSignUp(false);
-        setEmail('');    // Alanları temizle
+        setEmail('');
         setPassword('');
       }
     } catch (error) {
@@ -85,32 +72,26 @@ function App() {
   };
 
   const addNewTask = (columnId) => {
-    // 1. Önce kullanıcıdan başlık alıyoruz (title burada tanımlanıyor)
-    const title = prompt("Görev Başlığı:"); 
-    
-    // 2. Eğer başlık boşsa fonksiyonu bitiriyoruz
+    const title = prompt("Görev Başlığı:");
     if (!title || !data) return;
-    
-    // 3. Benzersiz bir ID oluşturuyoruz (newTaskId burada tanımlanıyor)
-    const newTaskId = `task-${Date.now()}`; 
-    
-    // 4. Yeni görev objesini oluşturuyoruz (açıklama artık boş)
-    const newTask = { id: newTaskId, title, description: '' };
-    
-    // 5. Mevcut sütunu ve içindeki ID listesini alıyoruz
+
+    const newTaskId = `task-${Date.now()}`;
+    const newTask = { id: newTaskId, title: title, description: '' };
+
     const currentColumn = data.columns[columnId];
-    const currentTaskIds = currentColumn && currentColumn.taskIds ? Array.from(currentColumn.taskIds) : [];
-    
-    // 6. State'i güncelliyoruz
+    const currentTaskIds = currentColumn.taskIds ? Array.from(currentColumn.taskIds) : [];
+
     setData({
       ...data,
       tasks: { ...data.tasks, [newTaskId]: newTask },
-      columns: { 
-        ...data.columns, 
-        [columnId]: { ...currentColumn, taskIds: [...currentTaskIds, newTaskId] } 
+      columns: {
+        ...data.columns,
+        [columnId]: { ...currentColumn, taskIds: [...currentTaskIds, newTaskId] }
       }
     });
   };
+
+  // ... Kodun geri kalanı (updateTask, deleteTask, onDragEnd ve return kısmı) aşağıda devam ediyor...
 
   const updateTask = (id, newTitle, newDesc) => {
     setData({
