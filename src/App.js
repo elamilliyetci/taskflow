@@ -25,6 +25,7 @@ function App() {
   const [editingTask, setEditingTask] = useState(null);
   const [authLoading, setAuthLoading] = useState(true); // Yeni eklendi
   const [isSignUp, setIsSignUp] = useState(false); // Kayıt ekranında olup olmadığını kontrol eder
+  const newTask = { id: newTaskId, title, description: '' }; // İçini boş bırakıyoruz
   
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -246,8 +247,11 @@ return (
         <div className="modal">
           <h3>Düzenle</h3>
           <input id="edit-title" defaultValue={editingTask.title} style={{width: '100%', marginBottom: '10px'}} />
-          <textarea id="edit-desc" defaultValue={editingTask.description} style={{width: '100%', minHeight: '100px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'white', borderRadius: '8px', padding: '10px'}} />
-          <div className="modal-buttons">
+          <textarea 
+  id="edit-desc" 
+  defaultValue={editingTask.description} 
+  placeholder="Detay ekleyin..." 
+/>          <div className="modal-buttons">
             <button onClick={() => updateTask(editingTask.id, document.getElementById('edit-title').value, document.getElementById('edit-desc').value)}>Kaydet</button>
             <button onClick={() => setEditingTask(null)}>İptal</button>
           </div>
