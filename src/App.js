@@ -85,16 +85,22 @@ function App() {
   };
 
   const addNewTask = (columnId) => {
-    const title = prompt("Görev Başlığı:");
+    const title = prompt("Görev Başlığı:"); // 'title' burada tanımlanıyor
     if (!title || !data) return;
-    const newTaskId = `task-${Date.now()}`;
-    const newTask = { id: newTaskId, title, description: 'Detay ekleyin...' };
+    
+    const newTaskId = `task-${Date.now()}`; // 'newTaskId' burada tanımlanıyor
+    const newTask = { id: newTaskId, title, description: '' }; // description artık boş
+    
     const currentColumn = data.columns[columnId];
     const currentTaskIds = currentColumn && currentColumn.taskIds ? Array.from(currentColumn.taskIds) : [];
+    
     setData({
       ...data,
       tasks: { ...data.tasks, [newTaskId]: newTask },
-      columns: { ...data.columns, [columnId]: { ...currentColumn, taskIds: [...currentTaskIds, newTaskId] } }
+      columns: { 
+        ...data.columns, 
+        [columnId]: { ...currentColumn, taskIds: [...currentTaskIds, newTaskId] } 
+      }
     });
   };
 
@@ -251,7 +257,7 @@ return (
             id="edit-desc" 
             defaultValue={editingTask.description} 
             placeholder="Detay ekleyin..." 
-          />          
+          />        
             <div className="modal-buttons">
             <button onClick={() => updateTask(editingTask.id, document.getElementById('edit-title').value, document.getElementById('edit-desc').value)}>Kaydet</button>
             <button onClick={() => setEditingTask(null)}>İptal</button>
