@@ -123,8 +123,6 @@ body {
   transition: all 0.3s ease;
   position: relative;
   cursor: grab;
-  pointer-events: auto !important;
-  user-select: none;
 }
 
 .card:hover {

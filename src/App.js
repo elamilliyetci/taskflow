@@ -115,45 +115,41 @@ function App() {
 
   const onDragEnd = (result) => {
     const { destination, source, draggableId } = result;
-  
-    // Eğer geçerli bir hedef yoksa veya kart aynı yere bırakıldıysa işlem yapma
-    if (!destination || (destination.droppableId === source.droppableId && destination.index === source.index)) {
-      return;
-    }
-  
-    const startColumn = data.columns[source.droppableId];
-    const finishColumn = data.columns[destination.droppableId];
-  
-    // 1. ADIM: Yeni sıralamayı bellekte hesapla
-    let newState = { ...data };
-  
-    if (startColumn === finishColumn) {
-      const newTaskIds = Array.from(startColumn.taskIds);
+    if (!destination) return;
+
+    const start = data.columns[source.droppableId];
+    const finish = data.columns[destination.droppableId];
+
+    if (start === finish) {
+      const newTaskIds = Array.from(start.taskIds || []);
       newTaskIds.splice(source.index, 1);
       newTaskIds.splice(destination.index, 0, draggableId);
-  
-      newState = {
-        ...data,
-        columns: {
-          ...data.columns,
-          [startColumn.id]: { ...startColumn, taskIds: newTaskIds }
-        }
-      };
-    } else {
-      const startTaskIds = Array.from(startColumn.taskIds);
-      startTaskIds.splice(source.index, 1);
-      const finishTaskIds = Array.from(finishColumn.taskIds);
-      finishTaskIds.splice(destination.index, 0, draggableId);
-  
-      newState = {
-        ...data,
-        columns: {
-          ...data.columns,
-          [startColumn.id]: { ...startColumn, taskIds: startTaskIds },
-          [finishColumn.id]: { ...finishColumn, taskIds: finishTaskIds }
-        }
-      };
+
+      setData({ 
+        ...data, 
+        columns: { 
+          ...data.columns, 
+          [start.id]: { ...start, taskIds: newTaskIds } 
+        } 
+      });
+      return;
     }
+
+    const startIds = Array.from(start.taskIds || []);
+    startIds.splice(source.index, 1);
+
+    const finishIds = Array.from(finish.taskIds || []);
+    finishIds.splice(destination.index, 0, draggableId);
+
+    setData({
+      ...data,
+      columns: { 
+        ...data.columns, 
+        [start.id]: { ...start, taskIds: startIds }, 
+        [finish.id]: { ...finish, taskIds: finishIds } 
+      }
+    });
+  };
   
     // 2. ADIM: EKRANI ANINDA GÜNCELLE (Zıplamayı engelleyen kısım burası)
     setData(newState);
