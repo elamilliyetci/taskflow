@@ -120,166 +120,159 @@ function App() {
     const start = data.columns[source.droppableId];
     const finish = data.columns[destination.droppableId];
 
+    // 1. ADIM: Yeni durumu (state) hesapla
+    let newState = { ...data };
+
     if (start === finish) {
       const newTaskIds = Array.from(start.taskIds || []);
       newTaskIds.splice(source.index, 1);
       newTaskIds.splice(destination.index, 0, draggableId);
 
-      setData({ 
-        ...data, 
+      newState = {
+        ...data,
+        columns: {
+          ...data.columns,
+          [start.id]: { ...start, taskIds: newTaskIds }
+        }
+      };
+    } else {
+      const startIds = Array.from(start.taskIds || []);
+      startIds.splice(source.index, 1);
+      const finishIds = Array.from(finish.taskIds || []);
+      finishIds.splice(destination.index, 0, draggableId);
+
+      newState = {
+        ...data,
         columns: { 
           ...data.columns, 
-          [start.id]: { ...start, taskIds: newTaskIds } 
-        } 
-      });
-      return;
+          [start.id]: { ...start, taskIds: startIds }, 
+          [finish.id]: { ...finish, taskIds: finishIds } 
+        }
+      };
     }
 
-    const startIds = Array.from(start.taskIds || []);
-    startIds.splice(source.index, 1);
-
-    const finishIds = Array.from(finish.taskIds || []);
-    finishIds.splice(destination.index, 0, draggableId);
-
-    setData({
-      ...data,
-      columns: { 
-        ...data.columns, 
-        [start.id]: { ...start, taskIds: startIds }, 
-        [finish.id]: { ...finish, taskIds: finishIds } 
-      }
-    });
-  };
-  
-    // 2. ADIM: EKRANI ANINDA GÜNCELLE (Zıplamayı engelleyen kısım burası)
+    // 2. ADIM: EKRANI ANINDA GÜNCELLE
     setData(newState);
-  
-    // 3. ADIM: VERİTABANINA YAZ (Arka planda sessizce gerçekleşir)
+
+    // 3. ADIM: VERİTABANINA YAZ
     if (user) {
       const userRef = ref(db, `users/${user.uid}/boardData`);
-      set(userRef, newState); // Doğrudan yeni hesaplanan state'i gönderiyoruz
+      set(userRef, newState);
     }
-  };
+  }; // onDragEnd fonksiyonu burada TEK SEFERDE bitiyor.
 
-// 1. Durum: Firebase kimlik kontrolü yaparken veya veriler buluttan inerken gösterilecek ekran
-if (authLoading || (user && !data)) {
-  return <div className="loading-screen">Yükleniyor...</div>;
-}
+  // 1. Durum: Yükleme ekranı
+  if (authLoading || (user && !data)) {
+    return <div className="loading-screen">Yükleniyor...</div>;
+  }
 
-// 2. Durum: Kontrol bitti ve kullanıcı giriş yapmamışsa gösterilecek giriş ekranı
-if (!user) {
-  return (
-    <div className="login-container">
-      <div className="login-box">
-        <h2>TaskFlow</h2>
-        <p style={{ color: '#94a3b8', fontSize: '0.9rem', marginBottom: '20px' }}>
-          {isSignUp ? "Yeni Hesap Oluşturun" : "Kanban Proje Yönetim Tahtası"}
-        </p>
-        
-        <input 
-          type="email" 
-          required 
-          placeholder="E-posta" 
-          value={email}
-          onChange={(e) => setEmail(e.target.value)} 
-        />
-        <input 
-          type="password" 
-          placeholder="Şifre" 
-          value={password}
-          onChange={(e) => setPassword(e.target.value)} 
-        />
-
-        <div className="auth-buttons">
-          {isSignUp ? (
-            <>
-              <button onClick={() => handleAuth('signup')}>Hesabı Oluştur</button>
-              <button className="text-btn" onClick={() => setIsSignUp(false)}>Giriş Ekranına Dön</button>
-            </>
-          ) : (
-            <>
-              <button onClick={() => handleAuth('login')}>Giriş Yap</button>
-              <button className="secondary-btn" onClick={() => setIsSignUp(true)}>Kayıt Ol</button>
-            </>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// 3. Durum: Her şey hazırsa ana uygulama ekranı
-return (
-  <div className="App">
-    <header className="app-header">
-      <h1>TaskFlow</h1>
-      <button className="logout-btn" onClick={() => signOut(auth)}>Çıkış Yap</button>
-    </header>
-    
-    <DragDropContext onDragEnd={onDragEnd}>
-      <div className="board">
-        {data.columnOrder.map(colId => {
-          const column = data.columns[colId];
-          const tasks = (column.taskIds || []).map(taskId => data.tasks[taskId]);
-          return (
-            <div className="column" key={column.id}>
-              <div className="column-header">
-                <h2>{column.title}</h2>
-                <button onClick={() => addNewTask(column.id)}>+</button>
-              </div>
-              <Droppable droppableId={column.id}>
-                {(provided) => (
-                  <div ref={provided.innerRef} {...provided.droppableProps} className="task-list">
-                    {tasks.map((task, index) => (
-                      task && (
-                        <Draggable key={task.id} draggableId={task.id} index={index}>
-                          {(provided) => (
-                            <div 
-                              className="card" 
-                              ref={provided.innerRef} 
-                              {...provided.draggableProps} 
-                              {...provided.dragHandleProps} 
-                              onClick={() => setEditingTask(task)}
-                            >
-                              <strong>{task.title}</strong>
-                              <p style={{ color: task.description ? '#94a3b8' : 'rgba(148, 163, 184, 0.5)', fontStyle: task.description ? 'normal' : 'italic' }}>
-                                 {task.description || 'Detay ekleyin...'}
-                              </p>
-                              <button className="del-btn" onClick={(e) => { e.stopPropagation(); deleteTask(task.id, column.id); }}>✕</button>
-                            </div>
-                          )}
-                        </Draggable>
-                      )
-                    ))}
-                    {provided.placeholder}
-                  </div>
-                )}
-              </Droppable>
-            </div>
-          );
-        })}
-      </div>
-    </DragDropContext>
-
-    {editingTask && (
-      <div className="modal-overlay">
-        <div className="modal">
-          <h3>Düzenle</h3>
-          <input id="edit-title" defaultValue={editingTask.title} style={{width: '100%', marginBottom: '10px'}} />
-          <textarea 
-            id="edit-desc" 
-            defaultValue={editingTask.description} 
-            placeholder="Detay ekleyin..." 
-          />        
-            <div className="modal-buttons">
-            <button onClick={() => updateTask(editingTask.id, document.getElementById('edit-title').value, document.getElementById('edit-desc').value)}>Kaydet</button>
-            <button onClick={() => setEditingTask(null)}>İptal</button>
+  // 2. Durum: Giriş ekranı
+  if (!user) {
+    return (
+      <div className="login-container">
+        <div className="login-box">
+          <h2>TaskFlow</h2>
+          <p style={{ color: '#94a3b8', fontSize: '0.9rem', marginBottom: '20px' }}>
+            {isSignUp ? "Yeni Hesap Oluşturun" : "Kanban Proje Yönetim Tahtası"}
+          </p>
+          <input 
+            type="email" 
+            placeholder="E-posta" 
+            value={email}
+            onChange={(e) => setEmail(e.target.value)} 
+          />
+          <input 
+            type="password" 
+            placeholder="Şifre" 
+            value={password}
+            onChange={(e) => setPassword(e.target.value)} 
+          />
+          <div className="auth-buttons">
+            {isSignUp ? (
+              <>
+                <button onClick={() => handleAuth('signup')}>Hesabı Oluştur</button>
+                <button className="text-btn" onClick={() => setIsSignUp(false)}>Giriş Ekranına Dön</button>
+              </>
+            ) : (
+              <>
+                <button onClick={() => handleAuth('login')}>Giriş Yap</button>
+                <button className="secondary-btn" onClick={() => setIsSignUp(true)}>Kayıt Ol</button>
+              </>
+            )}
           </div>
         </div>
       </div>
-    )}
-  </div>
-);
-}
+    );
+  }
+
+  // 3. Durum: Ana uygulama
+  return (
+    <div className="App">
+      <header className="app-header">
+        <h1>TaskFlow</h1>
+        <button className="logout-btn" onClick={() => signOut(auth)}>Çıkış Yap</button>
+      </header>
+      
+      <DragDropContext onDragEnd={onDragEnd}>
+        <div className="board">
+          {data.columnOrder.map(colId => {
+            const column = data.columns[colId];
+            const tasks = (column.taskIds || []).map(taskId => data.tasks[taskId]);
+            return (
+              <div className="column" key={column.id}>
+                <div className="column-header">
+                  <h2>{column.title}</h2>
+                  <button onClick={() => addNewTask(column.id)}>+</button>
+                </div>
+                <Droppable droppableId={column.id}>
+                  {(provided) => (
+                    <div ref={provided.innerRef} {...provided.droppableProps} className="task-list">
+                      {tasks.map((task, index) => (
+                        task && (
+                          <Draggable key={task.id} draggableId={task.id} index={index}>
+                            {(provided) => (
+                              <div 
+                                className="card" 
+                                ref={provided.innerRef} 
+                                {...provided.draggableProps} 
+                                {...provided.dragHandleProps} 
+                                onClick={() => setEditingTask(task)}
+                              >
+                                <strong>{task.title}</strong>
+                                <p style={{ color: task.description ? '#94a3b8' : 'rgba(148, 163, 184, 0.5)', fontStyle: task.description ? 'normal' : 'italic' }}>
+                                   {task.description || 'Detay ekleyin...'}
+                                </p>
+                                <button className="del-btn" onClick={(e) => { e.stopPropagation(); deleteTask(task.id, column.id); }}>✕</button>
+                              </div>
+                            )}
+                          </Draggable>
+                        )
+                      ))}
+                      {provided.placeholder}
+                    </div>
+                  )}
+                </Droppable>
+              </div>
+            );
+          })}
+        </div>
+      </DragDropContext>
+
+      {editingTask && (
+        <div className="modal-overlay">
+          <div className="modal">
+            <h3>Düzenle</h3>
+            <input id="edit-title" defaultValue={editingTask.title} style={{width: '100%', marginBottom: '10px'}} />
+            <textarea id="edit-desc" defaultValue={editingTask.description} placeholder="Detay ekleyin..." />        
+            <div className="modal-buttons">
+              <button onClick={() => updateTask(editingTask.id, document.getElementById('edit-title').value, document.getElementById('edit-desc').value)}>Kaydet</button>
+              <button onClick={() => setEditingTask(null)}>İptal</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+} // Bu parantez function App'i kapatır.
 
 export default App;
